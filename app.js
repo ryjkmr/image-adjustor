@@ -13,6 +13,7 @@ const showOutputButton = document.querySelector("#showOutputButton");
 const fitWidthButton = document.querySelector("#fitWidthButton");
 const fitHeightButton = document.querySelector("#fitHeightButton");
 const canvasFrame = document.querySelector("#canvasFrame");
+const toolLinks = [...document.querySelectorAll("[data-copy-target]")];
 const statusText = document.querySelector("#statusText");
 const imageMeta = document.querySelector("#imageMeta");
 const emptyState = document.querySelector("#emptyState");
@@ -51,7 +52,7 @@ let originalImageData = null;
 let renderToken = 0;
 let grayscaleEnabled = false;
 let invertEnabled = false;
-let previewMode = "source";
+let previewMode = "output";
 let previewFitMode = "width";
 
 function clamp(value, min = 0, max = 255) {
@@ -274,6 +275,47 @@ function fitCanvas(canvas, width, height) {
   canvas.height = height;
 }
 
+function hasLoadedImage() {
+  return Boolean(originalImageData);
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve) => {
+    canvas.toBlob(resolve, "image/png");
+  });
+}
+
+async function copyOutputImageToClipboard(successMessage, failureMessage) {
+  if (!hasLoadedImage()) {
+    return false;
+  }
+
+  if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+    statusText.textContent = failureMessage;
+    return false;
+  }
+
+  try {
+    const blob = await canvasToBlob(outputCanvas);
+
+    if (!blob) {
+      statusText.textContent = failureMessage;
+      return false;
+    }
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "image/png": blob,
+      }),
+    ]);
+    statusText.textContent = successMessage;
+    return true;
+  } catch (_error) {
+    statusText.textContent = failureMessage;
+    return false;
+  }
+}
+
 function renderImage() {
   if (!originalImageData) {
     return;
@@ -476,30 +518,48 @@ fitHeightButton.addEventListener("click", () => {
 resetButton.addEventListener("click", resetControls);
 
 copyButton.addEventListener("click", async () => {
-  if (!navigator.clipboard?.write) {
-    statusText.textContent = "このブラウザでは画像のクリップボードコピーに対応していません。";
-    return;
+  await handleCopyButtonAction();
+});
+
+async function handleCopyButtonAction() {
+  if (!hasLoadedImage()) {
+    statusText.textContent = "コピーする画像がありません。";
+    return false;
   }
 
-  try {
-    const blob = await new Promise((resolve) => {
-      outputCanvas.toBlob(resolve, "image/png");
-    });
+  return copyOutputImageToClipboard(
+    "補正画像をクリップボードにコピーしました。",
+    "クリップボードへのコピーに失敗しました。ブラウザ権限を確認してください。",
+  );
+}
 
-    if (!blob) {
-      statusText.textContent = "画像のコピーに失敗しました。";
+toolLinks.forEach((link) => {
+  link.addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    const destination = link.getAttribute("href");
+    const toolName = link.dataset.toolName || "外部ツール";
+
+    if (!destination) {
       return;
     }
 
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        "image/png": blob,
-      }),
-    ]);
-    statusText.textContent = "補正画像をクリップボードにコピーしました。";
-  } catch (_error) {
-    statusText.textContent = "クリップボードへのコピーに失敗しました。ブラウザ権限を確認してください。";
-  }
+    if (!hasLoadedImage()) {
+      statusText.textContent = `${toolName}を開きます。`;
+      window.location.href = destination;
+      return;
+    }
+
+    const copied = await handleCopyButtonAction();
+
+    if (!copied) {
+      statusText.textContent = `画像コピーに失敗したため、そのまま${toolName}を開きます。`;
+    } else {
+      statusText.textContent = `画像をコピーして${toolName}へ移動します。`;
+    }
+
+    window.location.href = destination;
+  });
 });
 
 saveButton.addEventListener("click", () => {

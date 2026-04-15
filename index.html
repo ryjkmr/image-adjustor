@@ -9,8 +9,26 @@
   <body>
     <div class="page-shell">
       <header class="hero">
-        <div>
+        <div class="hero-bar">
           <h1>画像補正ツール</h1>
+          <nav class="tool-links" aria-label="関連ツール">
+            <a
+              class="tool-link"
+              href="https://ryjkmr.github.io/image-resize-crop/"
+              data-copy-target="true"
+              data-tool-name="リサイズ・トリミング"
+            >
+              コピーしてリサイズ・トリミングへ
+            </a>
+            <a
+              class="tool-link"
+              href="https://ryjkmr.github.io/quick-blur/"
+              data-copy-target="true"
+              data-tool-name="ぼかし・モザイク"
+            >
+              コピーしてぼかし・モザイクへ
+            </a>
+          </nav>
         </div>
       </header>
 
@@ -147,7 +165,7 @@
               id="showSourceButton"
               class="preview-toggle-button"
               type="button"
-              aria-pressed="true"
+              aria-pressed="false"
             >
               補正前
             </button>
@@ -155,7 +173,7 @@
               id="showOutputButton"
               class="preview-toggle-button"
               type="button"
-              aria-pressed="false"
+              aria-pressed="true"
             >
               補正後
             </button>
@@ -172,8 +190,8 @@
 
           <article class="preview-card single-preview">
             <div id="canvasFrame" class="canvas-frame fit-width">
-              <canvas id="sourceCanvas"></canvas>
-              <canvas id="outputCanvas" class="is-hidden"></canvas>
+              <canvas id="sourceCanvas" class="is-hidden"></canvas>
+              <canvas id="outputCanvas"></canvas>
               <p id="emptyState" class="empty-state">
                 ここにプレビューが表示されます。画像ファイルを選ぶか、クリップボードの画像を貼り付けてください。
               </p>

@@ -42,11 +42,46 @@ input {
   margin-bottom: 24px;
 }
 
+.hero-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1.05;
   font-weight: 750;
+}
+
+.tool-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tool-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.tool-link:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .hero-card,
@@ -357,6 +392,15 @@ canvas {
 @media (max-width: 1080px) {
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .hero-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tool-links {
+    justify-content: flex-start;
   }
 
   .controls {
